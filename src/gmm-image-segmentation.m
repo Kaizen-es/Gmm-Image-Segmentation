@@ -1,11 +1,8 @@
 %{
-                    EECE5644 FALL 2025 - ASSIGNMENT 4
-                                QUESTION 2
                         GMM-Based Image Segmentation
 %}
 clear all, close all,
 
-fprintf('ASSIGNMENT 4 - QUESTION 2\n');
 fprintf('GMM-Based Image Segmentation\n\n');
 
 % Set random seed for reproducibility
@@ -28,11 +25,11 @@ fprintf('Total pixels: %d\n\n', N);
 fprintf('FEATURE EXTRACTION\n');
 img_data = double(img_data);
 
-% Create row and column index matrices - Adapted from Professor's ExampleKmeansImageSegmentation.m
+% Create row and column index matrices 
 row_indices = [1:n_rows]' * ones(1, n_cols);
 col_indices = ones(n_rows, 1) * [1:n_cols];
 
-% Extract features: [row, col, R, G, B] - Adapted from Professor's ExampleKmeansImageSegmentation.m
+% Extract features: [row, col, R, G, B] 
 features = [row_indices(:)'; col_indices(:)']; 
 for channel = 1:n_channels
     channel_data = img_data(:,:,channel);
@@ -41,7 +38,7 @@ end
 
 fprintf('Feature vector dimension: %d (row, col, R, G, B)\n', size(features, 1));
 
-% Normalize each feature to [0,1] - Adapted from Professor's ExampleKmeansImageSegmentation.m
+% Normalize each feature to [0,1] 
 min_features = min(features, [], 2);
 max_features = max(features, [], 2);
 ranges = max_features - min_features;
@@ -63,11 +60,11 @@ fprintf('\n\n');
 % K-fold cross-validation
 fprintf('%d-fold cross-validation:\n', K);
 
-% Create random permutation for CV partitioning - Added based on suggestion from Chatgpt
+% Create random permutation for CV partitioning 
 perm_indices = randperm(N);
 x_shuffled = x(:, perm_indices);
 
-% Partition data into K folds - Adapted from Professor's PolynomialFitCrossValidation.m
+% Partition data into K folds
 dummy = ceil(linspace(0, N, K+1));
 for k = 1:K
     ind_partition_limits(k,:) = [dummy(k)+1, dummy(k+1)];
@@ -83,7 +80,7 @@ for m_idx = 1:length(M_candidates)
     fold_log_likelihoods = zeros(K, 1);
     
     for k = 1:K
-        % Partition data - Adapted from Professor's PolynomialFitCrossValidation.m
+        % Partition data 
         ind_validate = ind_partition_limits(k,1):ind_partition_limits(k,2);
         x_validate = x_shuffled(:, ind_validate);
         
@@ -97,7 +94,7 @@ for m_idx = 1:length(M_candidates)
         
         x_train_fold = x_shuffled(:, ind_train_fold);
         
-        % Fit GMM using EM algorithm - Adapted from discussion with Claude 
+        % Fit GMM using EM algorithm 
         % Using MATLAB's fitgmdist with appropriate options
         options = statset('MaxIter', 500, 'Display', 'off');
         try
@@ -139,7 +136,7 @@ grid on;
 % TRAIN FINAL GMM WITH OPTIMAL MODEL ORDER
 fprintf('\nTRAINING FINAL GMM\n');
 
-% Train final model on all data - Adapted from discussion with Claude 
+% Train final model on all data 
 options_final = statset('MaxIter', 1000, 'Display', 'off');
 
 gmm_final = fitgmdist(x', M_optimal, ...
@@ -153,16 +150,16 @@ fprintf('  Mixing proportions: ');
 fprintf('%.3f ', gmm_final.ComponentProportion);
 fprintf('\n\n');
 
-% PIXEL ASSIGNMENT AND SEGMENTATION - Adapted from discussion with Claude
+% PIXEL ASSIGNMENT AND SEGMENTATION
 fprintf('IMAGE SEGMENTATION\n');
 
 % Compute posterior probabilities for each pixel
 posteriors = posterior(gmm_final, x');
 
-% Assign each pixel to most likely component - Adapted from Professor's ExampleKmeansImageSegmentation.m
+% Assign each pixel to most likely component
 [~, pixel_labels] = max(posteriors, [], 2);
 
-% Reshape labels to image dimensions - Adapted from Professor's ExampleKmeansImageSegmentation.m
+% Reshape labels to image dimensions 
 label_image = reshape(pixel_labels, n_rows, n_cols);
 
 fprintf('Pixels per segment:\n');
@@ -173,7 +170,7 @@ for m = 1:M_optimal
 end
 fprintf('\n');
 
-% VISUALIZATION - Pattern from Professor's ExampleKmeansImageSegmentation.m
+% VISUALIZATION
 figure(2), clf,
 
 % Original image
